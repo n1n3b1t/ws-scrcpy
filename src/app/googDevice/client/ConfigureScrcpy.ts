@@ -372,8 +372,8 @@ export class ConfigureScrcpy extends BaseClient<ParamsStreamScrcpy, ConfigureScr
                 codecOptions,
                 encoderName,
             });
-        } catch (error: any) {
-            console.error(this.TAG, error.message);
+        } catch (error: unknown) {
+            console.error(this.TAG, 'Failed to build video settings:', error);
             return null;
         }
     }
@@ -611,7 +611,37 @@ export class ConfigureScrcpy extends BaseClient<ParamsStreamScrcpy, ConfigureScr
         const player = this.getPlayer();
         if (videoSettings && player) {
             const fitToScreen = this.getFitToScreenValue();
-            player.saveVideoSettings(this.udid, videoSettings, fitToScreen, this.displayInfo);
+            try {
+                player.saveVideoSettings(this.udid, videoSettings, fitToScreen, this.displayInfo);
+                // Visual feedback that settings were saved
+                if (this.saveSettingsButton) {
+                    const originalText = this.saveSettingsButton.innerText;
+                    this.saveSettingsButton.innerText = 'Saved!';
+                    this.saveSettingsButton.disabled = true;
+                    setTimeout(() => {
+                        if (this.saveSettingsButton) {
+                            this.saveSettingsButton.innerText = originalText;
+                            this.saveSettingsButton.disabled = false;
+                        }
+                    }, 1500);
+                }
+            } catch (error: unknown) {
+                console.error(this.TAG, 'Failed to save settings:', error);
+                if (this.saveSettingsButton) {
+                    const originalText = this.saveSettingsButton.innerText;
+                    this.saveSettingsButton.innerText = 'Save failed!';
+                    setTimeout(() => {
+                        if (this.saveSettingsButton) {
+                            this.saveSettingsButton.innerText = originalText;
+                        }
+                    }, 2000);
+                }
+            }
+        } else {
+            console.error(this.TAG, 'Cannot save settings: videoSettings or player is missing', {
+                hasVideoSettings: !!videoSettings,
+                hasPlayer: !!player,
+            });
         }
     };
 

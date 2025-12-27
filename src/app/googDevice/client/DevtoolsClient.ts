@@ -314,18 +314,36 @@ export class DevtoolsClient extends ManagerClient<ParamsDevtools, never> {
         if (!url) {
             return;
         }
-        this.hiddenInput.value = url;
-        this.hiddenInput.removeAttribute('hidden');
-        this.hiddenInput.select();
-        this.hiddenInput.setSelectionRange(0, url.length);
-        document.execCommand('copy');
-        this.hiddenInput.setAttribute('hidden', 'hidden');
-        this.tooltip.style.left = `${event.clientX}px`;
-        this.tooltip.style.top = `${event.clientY}px`;
-        this.tooltip.style.display = 'block';
-        this.hideTooltip();
+        this.copyToClipboard(url).then(() => {
+            this.tooltip.style.left = `${event.clientX}px`;
+            this.tooltip.style.top = `${event.clientY}px`;
+            this.tooltip.style.display = 'block';
+            this.hideTooltip();
+        });
         event.preventDefault();
     };
+
+    private async copyToClipboard(text: string): Promise<void> {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers or insecure contexts
+                this.hiddenInput.value = text;
+                this.hiddenInput.removeAttribute('hidden');
+                this.hiddenInput.select();
+                this.hiddenInput.setSelectionRange(0, text.length);
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error(TAG, 'Fallback copy failed:', err);
+                }
+                this.hiddenInput.setAttribute('hidden', 'hidden');
+            }
+        } catch (err) {
+            console.error(TAG, 'Failed to copy to clipboard:', err);
+        }
+    }
 
     private hideTooltip() {
         if (this.hideTimeout) {

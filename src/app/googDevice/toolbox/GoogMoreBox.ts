@@ -285,9 +285,36 @@ export class GoogMoreBox {
         if (ev.type !== DeviceMessage.TYPE_CLIPBOARD) {
             return;
         }
-        this.input.value = ev.getText();
+        const text = ev.getText();
+        this.input.value = text;
         this.input.select();
-        document.execCommand('copy');
+        this.copyToClipboard(text);
+    }
+
+    private async copyToClipboard(text: string): Promise<void> {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers or insecure contexts
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error(TAG, 'Fallback copy failed:', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        } catch (err) {
+            console.error(TAG, 'Failed to copy to clipboard:', err);
+        }
     }
 
     private static wrap(

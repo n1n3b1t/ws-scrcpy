@@ -1,0 +1,29 @@
+services:
+  ws-scrcpy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ws-scrcpy:latest
+    container_name: ws-scrcpy
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+      # Uncomment for HTTPS
+      # - "8443:8443"
+    volumes:
+      # Config file (optional)
+      - ./config.yaml:/app/config.yaml:ro
+      # USB device access for ADB
+      - /dev/bus/usb:/dev/bus/usb
+      # udev for hotplug detection
+      - /run/udev:/run/udev:ro
+      # Persist ADB keys between restarts
+      - ./adb-keys:/root/.android
+    # Grant access to USB devices (major 189) - safer than privileged:true
+    device_cgroup_rules:
+      - 'c 189:* rwm'
+    environment:
+      - NODE_ENV=production
+    # Run ADB server inside container on startup
+    command: >
+      sh -c "adb start-server && npm start"
