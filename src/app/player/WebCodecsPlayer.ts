@@ -24,7 +24,7 @@ export class WebCodecsPlayer extends BaseCanvasBasedPlayer {
 
     public static readonly preferredVideoSettings: VideoSettings = new VideoSettings({
         lockedVideoOrientation: -1,
-        bitrate: 524288,
+        bitrate: 2000000,
         maxFps: 24,
         iFrameInterval: 5,
         bounds: new Size(480, 480),

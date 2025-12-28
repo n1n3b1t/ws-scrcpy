@@ -91,7 +91,7 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
     public static playerCodeName = 'baseplayer';
     public static preferredVideoSettings: VideoSettings = new VideoSettings({
         lockedVideoOrientation: -1,
-        bitrate: 524288,
+        bitrate: 2000000,
         maxFps: 24,
         iFrameInterval: 5,
         bounds: new Size(480, 480),
@@ -211,13 +211,13 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
         displayInfo?: DisplayInfo,
     ): boolean {
         if (!window.localStorage) {
-            return false;
+            return true;
         }
-        let parsedValue = false;
+        let parsedValue = true;
         const key = `${this.getFullStorageKey(storageKeyPrefix, udid, displayInfo)}:fit`;
         const saved = window.localStorage.getItem(key);
         if (!saved) {
-            return false;
+            return true;
         }
         try {
             parsedValue = JSON.parse(saved);

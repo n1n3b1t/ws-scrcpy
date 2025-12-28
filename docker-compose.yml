@@ -7,7 +7,7 @@ services:
     container_name: ws-scrcpy
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8233:8000"
       # Uncomment for HTTPS
       # - "8443:8443"
     volumes:

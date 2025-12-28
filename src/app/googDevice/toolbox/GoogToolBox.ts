@@ -7,6 +7,7 @@ import { ToolBoxElement } from '../../toolbox/ToolBoxElement';
 import { ToolBoxCheckbox } from '../../toolbox/ToolBoxCheckbox';
 import { StreamClientScrcpy } from '../client/StreamClientScrcpy';
 import { BasePlayer } from '../../player/BasePlayer';
+import { FullscreenApi } from '../../ui/FullscreenApi';
 
 const BUTTONS = [
     {
@@ -80,6 +81,35 @@ export class GoogToolBox extends ToolBox {
                 player.createScreenshot(client.getDeviceName());
             });
             elements.push(screenshot);
+        }
+
+        // Add fullscreen button using modern Fullscreen API
+        if (FullscreenApi.isSupported()) {
+            const fullscreenBtn = new ToolBoxButton('Toggle fullscreen', SvgImage.Icon.FULLSCREEN);
+            const updateFullscreenIcon = (isFullscreen: boolean): void => {
+                const svgElements = fullscreenBtn.getAllElements();
+                svgElements.forEach((el) => {
+                    const svg = el.querySelector('svg');
+                    if (svg) {
+                        const newIcon = SvgImage.create(
+                            isFullscreen ? SvgImage.Icon.FULLSCREEN_EXIT : SvgImage.Icon.FULLSCREEN,
+                        );
+                        svg.replaceWith(newIcon);
+                    }
+                });
+            };
+
+            FullscreenApi.addFullscreenChangeListener(updateFullscreenIcon);
+
+            fullscreenBtn.addEventListener('click', () => {
+                const deviceView = player.getTouchableElement().closest('.device-view');
+                if (deviceView instanceof HTMLElement) {
+                    FullscreenApi.toggleFullscreen(deviceView).catch((err) => {
+                        console.error('Failed to toggle fullscreen:', err);
+                    });
+                }
+            });
+            elements.push(fullscreenBtn);
         }
 
         const keyboard = new ToolBoxCheckbox(
