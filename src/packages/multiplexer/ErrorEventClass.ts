@@ -1,6 +1,11 @@
+
 import { Event2 } from './Event';
 
 export class ErrorEvent2 extends Event2 implements ErrorEvent {
+    public readonly AT_TARGET: 2 = 2;
+    public readonly BUBBLING_PHASE: 3 = 3;
+    public readonly CAPTURING_PHASE: 1 = 1;
+    public readonly NONE: 0 = 0;
     readonly colno: number;
     readonly error: any;
     readonly filename: string;

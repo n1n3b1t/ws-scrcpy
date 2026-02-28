@@ -38,7 +38,13 @@ export class WebSocketServer implements Service {
                 return;
             }
             const url = new URL(request.url, 'https://example.org/');
-            const action = url.searchParams.get('action') || '';
+            let action = url.searchParams.get('action') || '';
+
+            // Auto-connect mode: root path defaults to scrcpy stream
+            if (!action && url.pathname === '/') {
+                action = 'proxy-adb';
+            }
+            
             let processed = false;
             for (const mwFactory of this.mwFactories.values()) {
                 const service = mwFactory.processRequest(ws, { action, request, url });

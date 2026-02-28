@@ -9,22 +9,8 @@ import { StreamClientScrcpy } from '../client/StreamClientScrcpy';
 import { BasePlayer } from '../../player/BasePlayer';
 import { FullscreenApi } from '../../ui/FullscreenApi';
 
+// Standard Android developer environment controls
 const BUTTONS = [
-    {
-        title: 'Power',
-        code: KeyEvent.KEYCODE_POWER,
-        icon: SvgImage.Icon.POWER,
-    },
-    {
-        title: 'Volume up',
-        code: KeyEvent.KEYCODE_VOLUME_UP,
-        icon: SvgImage.Icon.VOLUME_UP,
-    },
-    {
-        title: 'Volume down',
-        code: KeyEvent.KEYCODE_VOLUME_DOWN,
-        icon: SvgImage.Icon.VOLUME_DOWN,
-    },
     {
         title: 'Back',
         code: KeyEvent.KEYCODE_BACK,
@@ -40,6 +26,21 @@ const BUTTONS = [
         code: KeyEvent.KEYCODE_APP_SWITCH,
         icon: SvgImage.Icon.OVERVIEW,
     },
+    {
+        title: 'Volume up',
+        code: KeyEvent.KEYCODE_VOLUME_UP,
+        icon: SvgImage.Icon.VOLUME_UP,
+    },
+    {
+        title: 'Volume down',
+        code: KeyEvent.KEYCODE_VOLUME_DOWN,
+        icon: SvgImage.Icon.VOLUME_DOWN,
+    },
+    {
+        title: 'Power',
+        code: KeyEvent.KEYCODE_POWER,
+        icon: SvgImage.Icon.POWER,
+    },
 ];
 
 export class GoogToolBox extends ToolBox {
@@ -47,14 +48,8 @@ export class GoogToolBox extends ToolBox {
         super(list);
     }
 
-    public static createToolBox(
-        udid: string,
-        player: BasePlayer,
-        client: StreamClientScrcpy,
-        moreBox?: HTMLElement,
-    ): GoogToolBox {
+    public static createToolBox(udid: string, player: BasePlayer, client: StreamClientScrcpy): GoogToolBox {
         const playerName = player.getName();
-        const list = BUTTONS.slice();
         const handler = <K extends keyof HTMLElementEventMap, T extends HTMLElement>(
             type: K,
             element: ToolBoxElement<T>,
@@ -67,7 +62,7 @@ export class GoogToolBox extends ToolBox {
             const event = new KeyCodeControlMessage(action, code, 0, 0);
             client.sendMessage(event);
         };
-        const elements: ToolBoxElement<any>[] = list.map((item) => {
+        const elements: ToolBoxElement<any>[] = BUTTONS.map((item) => {
             const button = new ToolBoxButton(item.title, item.icon, {
                 code: item.code,
             });
@@ -75,6 +70,7 @@ export class GoogToolBox extends ToolBox {
             button.addEventListener('mouseup', handler);
             return button;
         });
+
         if (player.supportsScreenshot) {
             const screenshot = new ToolBoxButton('Take screenshot', SvgImage.Icon.CAMERA);
             screenshot.addEventListener('click', () => {
@@ -83,7 +79,6 @@ export class GoogToolBox extends ToolBox {
             elements.push(screenshot);
         }
 
-        // Add fullscreen button using modern Fullscreen API
         if (FullscreenApi.isSupported()) {
             const fullscreenBtn = new ToolBoxButton('Toggle fullscreen', SvgImage.Icon.FULLSCREEN);
             const updateFullscreenIcon = (isFullscreen: boolean): void => {
@@ -98,13 +93,11 @@ export class GoogToolBox extends ToolBox {
                     }
                 });
             };
-
             FullscreenApi.addFullscreenChangeListener(updateFullscreenIcon);
-
             fullscreenBtn.addEventListener('click', () => {
-                const deviceView = player.getTouchableElement().closest('.device-view');
-                if (deviceView instanceof HTMLElement) {
-                    FullscreenApi.toggleFullscreen(deviceView).catch((err) => {
+                const phoneFrame = player.getTouchableElement().closest('.phone-frame');
+                if (phoneFrame instanceof HTMLElement) {
+                    FullscreenApi.toggleFullscreen(phoneFrame).catch((err) => {
                         console.error('Failed to toggle fullscreen:', err);
                     });
                 }
@@ -123,16 +116,6 @@ export class GoogToolBox extends ToolBox {
         });
         elements.push(keyboard);
 
-        if (moreBox) {
-            const displayId = player.getVideoSettings().displayId;
-            const id = `show_more_${udid}_${playerName}_${displayId}`;
-            const more = new ToolBoxCheckbox('More', SvgImage.Icon.MORE, id);
-            more.addEventListener('click', (_, el) => {
-                const element = el.getElement();
-                moreBox.style.display = element.checked ? 'block' : 'none';
-            });
-            elements.unshift(more);
-        }
         return new GoogToolBox(elements);
     }
 }

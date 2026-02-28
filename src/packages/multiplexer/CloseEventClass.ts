@@ -1,6 +1,8 @@
+
 import { Event2 } from './Event';
 
 export class CloseEvent2 extends Event2 implements CloseEvent {
+    public readonly NONE: 0 = 0;
     readonly code: number;
     readonly reason: string;
     readonly wasClean: boolean;

@@ -97,7 +97,7 @@ export class StreamReceiver<P extends ParamsStream> extends ManagerClient<Params
             this.encodersSet.add(name);
         }
         this.clientId = rest.readInt32BE(0);
-        nameBytes = Util.filterTrailingZeroes(nameBytes);
+        nameBytes = Util.filterTrailingZeroes(nameBytes) as any;
         this.deviceName = Util.utf8ByteArrayToString(nameBytes);
         this.hasInitialInfo = true;
         this.triggerInitialInfoEvents();
@@ -145,7 +145,7 @@ export class StreamReceiver<P extends ParamsStream> extends ManagerClient<Params
                 }
             }
 
-            this.emit('video', new Uint8Array(event.data));
+            this.emit('video', event.data as any);
         }
     }
 

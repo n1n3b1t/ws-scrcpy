@@ -90,8 +90,8 @@ export class WebCodecsPlayer extends BaseCanvasBasedPlayer {
             output: (frame) => {
                 this.onFrameDecoded(0, 0, frame);
             },
-            error: (error: DOMException) => {
-                console.error(error, `code: ${error.code}`);
+            error: (error: Error) => {
+                console.error(error);
                 this.stop();
             },
         });
@@ -106,7 +106,7 @@ export class WebCodecsPlayer extends BaseCanvasBasedPlayer {
         } else {
             array = data;
         }
-        this.buffer = array.buffer;
+        this.buffer = array.buffer as ArrayBuffer;
         return array;
     }
 
@@ -183,7 +183,7 @@ export class WebCodecsPlayer extends BaseCanvasBasedPlayer {
             const data = this.decodedFrames.shift();
             if (data) {
                 const frame: VideoFrame = data.frame;
-                this.context.drawImage(frame, 0, 0);
+                this.context.drawImage(frame as any, 0, 0);
                 frame.close();
             }
         }

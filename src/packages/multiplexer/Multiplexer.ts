@@ -254,9 +254,17 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
     public send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
         if (this.ws instanceof Multiplexer) {
             if (typeof data === 'string') {
-                data = Message.createBuffer(MessageType.RawStringData, this._id, Buffer.from(data));
+                data = Message.createBuffer(
+                    MessageType.RawStringData,
+                    this._id,
+                    Buffer.from(data) as unknown as ArrayBuffer,
+                );
             } else {
-                data = Message.createBuffer(MessageType.RawBinaryData, this._id, Buffer.from(data));
+                data = Message.createBuffer(
+                    MessageType.RawBinaryData,
+                    this._id,
+                    Buffer.from(data as any) as unknown as ArrayBuffer,
+                );
             }
         }
         this._send(data);
@@ -264,7 +272,7 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
 
     public sendData(data: string | ArrayBufferLike | Blob | ArrayBufferView): void {
         if (this.ws instanceof Multiplexer) {
-            data = Message.createBuffer(MessageType.Data, this._id, Buffer.from(data));
+            data = Message.createBuffer(MessageType.Data, this._id, Buffer.from(data as any) as unknown as ArrayBuffer);
         }
         this._send(data);
     }
@@ -292,7 +300,7 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
             if (this.readyState === this.OPEN) {
                 Util.setImmediate(() => {
                     channel.readyState = this.OPEN;
-                    channel.dispatchEvent(new EventClass('open'));
+                    channel.dispatchEvent(new EventClass('open') as any);
                 });
             }
         } else {
@@ -314,7 +322,7 @@ export class Multiplexer extends TypedEmitter<MultiplexerEvents> implements WebS
         }
         const id = this.getNextId();
         const channel = this._createChannel(id, true);
-        this.sendData(Message.createBuffer(MessageType.CreateChannel, id, data));
+        this.sendData(Message.createBuffer(MessageType.CreateChannel, id, data as unknown as ArrayBuffer));
         return channel;
     }
 

@@ -12,10 +12,10 @@ export class Event2 {
     public timeStamp: number;
     public target: any;
     public readonly isTrusted: boolean = true;
-    readonly AT_TARGET: number = 0;
-    readonly BUBBLING_PHASE: number = 0;
-    readonly CAPTURING_PHASE: number = 0;
-    readonly NONE: number = 0;
+    public readonly AT_TARGET: 2 = 2;
+    public readonly BUBBLING_PHASE: 3 = 3;
+    public readonly CAPTURING_PHASE: 1 = 1;
+    public readonly NONE: 0 = 0;
 
     constructor(type: string, options = { cancelable: true, bubbles: true, composed: false }) {
         const { cancelable, bubbles, composed } = { ...options };

@@ -1,1 +1,13 @@
-{}
+{
+    "USE_H264_CONVERTER": true,
+    "USE_BROADWAY": false,
+    "USE_TINY_H264": false,
+    "USE_WEBCODECS": false,
+    "INCLUDE_ADB_SHELL": false,
+    "INCLUDE_DEV_TOOLS": false,
+    "INCLUDE_FILE_LISTING": false,
+    "INCLUDE_APPL": false,
+    "INCLUDE_GOOG": true,
+    "SCRCPY_LISTENS_ON_ALL_INTERFACES": true,
+    "PATHNAME": "/"
+}

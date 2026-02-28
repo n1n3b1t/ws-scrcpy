@@ -21,7 +21,7 @@ export class Message {
             buffer.writeUInt32LE(reasonBuffer.byteLength, 2);
             buffer.set(reasonBuffer, 6);
         }
-        return new Message(MessageType.CloseChannel, id, buffer);
+        return new Message(MessageType.CloseChannel, id, buffer as unknown as ArrayBuffer);
     }
 
     public static createBuffer(type: MessageType, channelId: number, data?: ArrayBuffer): Buffer {
@@ -59,6 +59,10 @@ export class Message {
     }
 
     public toBuffer(): ArrayBuffer {
-        return Message.createBuffer(this.type, this.channelId, this.data);
+        return Message.createBuffer(
+            this.type,
+            this.channelId,
+            this.data as unknown as ArrayBuffer,
+        ) as unknown as ArrayBuffer;
     }
 }

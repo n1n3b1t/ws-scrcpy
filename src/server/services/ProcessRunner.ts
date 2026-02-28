@@ -8,8 +8,8 @@ export interface ProcessRunnerEvents {
     started: boolean;
     stdout: string;
     stderr: string;
-    close: { code: number; signal: string };
-    exit: { code: number | null; signal: string | null };
+    close: { code: number | null; signal: NodeJS.Signals | null };
+    exit: { code: number | null; signal: NodeJS.Signals | null };
     error: Error;
 }
 
