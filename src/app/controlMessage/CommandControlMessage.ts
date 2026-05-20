@@ -10,6 +10,13 @@ export enum FilePushState {
     CANCEL,
 }
 
+// scrcpy 4.0 GET_CLIPBOARD copyKey values
+export enum CopyKey {
+    NONE = 0,
+    COPY = 1,
+    CUT = 2,
+}
+
 type FilePushParams = {
     id: number;
     state: FilePushState;
@@ -44,13 +51,19 @@ export class CommandControlMessage extends ControlMessage {
         return event;
     }
 
-    public static createSetClipboardCommand(text: string, paste = false): CommandControlMessage {
+    public static createSetClipboardCommand(
+        text: string,
+        paste = false,
+        sequence: bigint = BigInt(0),
+    ): CommandControlMessage {
         const event = new CommandControlMessage(ControlMessage.TYPE_SET_CLIPBOARD);
         const textBytes: Uint8Array | null = text ? Util.stringToUtf8ByteArray(text) : null;
         const textLength = textBytes ? textBytes.length : 0;
         let offset = 0;
-        const buffer = Buffer.alloc(1 + 1 + 4 + textLength);
+        const buffer = Buffer.alloc(1 + 8 + 1 + 4 + textLength);
         offset = buffer.writeInt8(event.type, offset);
+        buffer.writeBigInt64BE(sequence, offset);
+        offset += 8;
         offset = buffer.writeInt8(paste ? 1 : 0, offset);
         offset = buffer.writeInt32BE(textLength, offset);
         if (textBytes) {
@@ -58,6 +71,15 @@ export class CommandControlMessage extends ControlMessage {
                 buffer.writeUInt8(byte, index + offset);
             });
         }
+        event.buffer = buffer;
+        return event;
+    }
+
+    public static createGetClipboardCommand(copyKey: CopyKey | number = CopyKey.NONE): CommandControlMessage {
+        const event = new CommandControlMessage(ControlMessage.TYPE_GET_CLIPBOARD);
+        const buffer = Buffer.alloc(2);
+        buffer.writeUInt8(event.type, 0);
+        buffer.writeUInt8(copyKey, 1);
         event.buffer = buffer;
         return event;
     }

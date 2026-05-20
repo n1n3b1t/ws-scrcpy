@@ -2,6 +2,7 @@ import Util from '../Util';
 
 export default class DeviceMessage {
     public static TYPE_CLIPBOARD = 0;
+    public static TYPE_ACK_CLIPBOARD = 1;
     public static TYPE_PUSH_RESPONSE = 101;
 
     public static readonly MAGIC_BYTES_MESSAGE = Util.stringToUtf8ByteArray('scrcpy_message');
@@ -29,6 +30,16 @@ export default class DeviceMessage {
         return Util.utf8ByteArrayToString(textBytes);
     }
 
+    public getAckSequence(): bigint {
+        if (this.type !== DeviceMessage.TYPE_ACK_CLIPBOARD) {
+            throw TypeError(`Wrong message type: ${this.type}`);
+        }
+        if (!this.buffer) {
+            throw Error('Empty buffer');
+        }
+        return this.buffer.readBigInt64BE(1);
+    }
+
     public getPushStats(): { id: number; code: number } {
         if (this.type !== DeviceMessage.TYPE_PUSH_RESPONSE) {
             throw TypeError(`Wrong message type: ${this.type}`);
@@ -45,6 +56,8 @@ export default class DeviceMessage {
         let desc: string;
         if (this.type === DeviceMessage.TYPE_CLIPBOARD && this.buffer) {
             desc = `, text=[${this.getText()}]`;
+        } else if (this.type === DeviceMessage.TYPE_ACK_CLIPBOARD && this.buffer) {
+            desc = `, sequence=${this.getAckSequence().toString()}`;
         } else {
             desc = this.buffer ? `, buffer=[${this.buffer.join(',')}]` : '';
         }
