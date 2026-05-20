@@ -49,7 +49,9 @@ export class FeaturedInteractionHandler extends InteractionHandler {
                 this.lastScrollEvent.hScroll !== hScroll
             ) {
                 this.lastScrollEvent = { time, hScroll, vScroll };
-                messages.push(new ScrollControlMessage(touchOnClient.touch.position, hScroll, vScroll));
+                messages.push(
+                    new ScrollControlMessage(touchOnClient.touch.position, hScroll, vScroll, event.buttons),
+                );
             }
         }
         return messages;
