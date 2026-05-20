@@ -12,20 +12,21 @@ import {
     SERVER_VERSION,
 } from '../../common/Constants';
 import path from 'path';
+import { randomBytes } from 'crypto';
 import PushTransfer from '@dead50f7/adbkit/lib/adb/sync/pushtransfer';
 import { ServerVersion } from './ServerVersion';
-import { buildLegacyArgs_v1_19_ws6 } from './ServerArgs';
+import { buildArgsKv_v4_0, buildLegacyArgs_v1_19_ws6 } from './ServerArgs';
 
 const TEMP_PATH = '/data/local/tmp/';
 const FILE_DIR = path.join(__dirname, 'vendor/Genymobile/scrcpy');
 const FILE_NAME = 'scrcpy-server.jar';
-const RUN_COMMAND = `CLASSPATH=${TEMP_PATH}${FILE_NAME} nohup app_process ${buildLegacyArgs_v1_19_ws6({
-    serverVersion: SERVER_VERSION,
-    serverType: SERVER_TYPE,
-    logLevel: LOG_LEVEL,
-    serverPort: SERVER_PORT,
-    listenOnAllInterfaces: SCRCPY_LISTENS_ON_ALL_INTERFACES,
-})}`;
+
+function generateScid(): string {
+    // 31-bit unsigned (top bit masked to fit in a Java int per upstream
+    // app/src/scrcpy.c::scrcpy_generate_scid).
+    const num = randomBytes(4).readUInt32BE() & 0x7fffffff;
+    return num.toString(16).padStart(8, '0');
+}
 
 type WaitForPidParams = { tryCounter: number; processExited: boolean; lookPidFile: boolean };
 
@@ -133,8 +134,37 @@ export class ScrcpyServer {
         }
         await this.copyServer(device);
 
+        const version = new ServerVersion(SERVER_VERSION);
+        const v4 = new ServerVersion('4.0');
+        let argsString: string;
+        if (version.equals(v4) || version.gt(v4)) {
+            // v4.0+: key=value, with a per-session scid.
+            const scid = generateScid();
+            argsString = buildArgsKv_v4_0({
+                serverVersion: SERVER_VERSION,
+                scid,
+                logLevel: LOG_LEVEL.toLowerCase(),  // upstream expects lowercase
+                audio: false,                       // no audio path in bridge yet
+                video: true,
+                videoCodec: 'h264',                 // bridge only handles h264 today
+                tunnelForward: true,                // ws-scrcpy uses adb forward
+                control: true,
+                cleanup: true,
+            });
+        } else {
+            // sub-4.0 (1.19-ws6 today): positional legacy form.
+            argsString = buildLegacyArgs_v1_19_ws6({
+                serverVersion: SERVER_VERSION,
+                serverType: SERVER_TYPE,
+                logLevel: LOG_LEVEL,
+                serverPort: SERVER_PORT,
+                listenOnAllInterfaces: SCRCPY_LISTENS_ON_ALL_INTERFACES,
+            });
+        }
+        const runCommand = `CLASSPATH=${TEMP_PATH}${FILE_NAME} nohup app_process ${argsString}`;
+
         const params: WaitForPidParams = { tryCounter: 0, processExited: false, lookPidFile: true };
-        const runPromise = device.runShellCommandAdb(RUN_COMMAND);
+        const runPromise = device.runShellCommandAdb(runCommand);
         runPromise
             .then((out) => {
                 if (device.isConnected()) {

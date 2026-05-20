@@ -56,6 +56,43 @@ let ok = true;
 ok = assertEqual('buildLegacyArgs_v1_19_ws6 output', actualArgs, expectedArgs) && ok;
 ok = assertEqual('RUN_COMMAND (CLASSPATH=... nohup app_process ARGS)', actualRunCommand, expectedRunCommand) && ok;
 
+// --- v4.0 key=value builder ---
+function buildArgsKv_v4_0(opts) {
+    const pairs = [
+        `scid=${opts.scid}`,
+        `log_level=${opts.logLevel}`,
+        `audio=${opts.audio ? 'true' : 'false'}`,
+        `video=${opts.video ? 'true' : 'false'}`,
+        `video_codec=${opts.videoCodec}`,
+    ];
+    if (opts.maxSize !== undefined) pairs.push(`max_size=${opts.maxSize}`);
+    if (opts.videoBitRate !== undefined) pairs.push(`video_bit_rate=${opts.videoBitRate}`);
+    if (opts.maxFps !== undefined) pairs.push(`max_fps=${opts.maxFps}`);
+    if (opts.displayId !== undefined) pairs.push(`display_id=${opts.displayId}`);
+    pairs.push(`tunnel_forward=${opts.tunnelForward ? 'true' : 'false'}`);
+    pairs.push(`control=${opts.control ? 'true' : 'false'}`);
+    pairs.push(`cleanup=${opts.cleanup ? 'true' : 'false'}`);
+    const args = [opts.serverVersion, ...pairs].join(' ');
+    return `/ com.genymobile.scrcpy.Server ${args} 2>&1 > /dev/null`;
+}
+
+const v4Input = {
+    serverVersion: '4.0',
+    scid: 'abcd1234',
+    logLevel: 'error',
+    audio: false,
+    video: true,
+    videoCodec: 'h264',
+    tunnelForward: true,
+    control: true,
+    cleanup: true,
+};
+const expectedV4Args =
+    '/ com.genymobile.scrcpy.Server 4.0 scid=abcd1234 log_level=error ' +
+    'audio=false video=true video_codec=h264 tunnel_forward=true ' +
+    'control=true cleanup=true 2>&1 > /dev/null';
+ok = assertEqual('buildArgsKv_v4_0 output', buildArgsKv_v4_0(v4Input), expectedV4Args) && ok;
+
 if (!ok) {
     process.exit(1);
 }
