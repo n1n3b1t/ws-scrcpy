@@ -309,7 +309,8 @@ export abstract class InteractionHandler {
         if (action === MotionEvent.ACTION_UP) {
             pressure = 0;
         }
-        return new TouchControlMessage(action, pointerId, position, pressure, buttons);
+        const actionButton = action === MotionEvent.ACTION_DOWN ? event.actionButton : 0;
+        return new TouchControlMessage(action, pointerId, position, pressure, actionButton, buttons);
     }
 
     public static mapTypeToAction(type: string): number {
@@ -485,7 +486,16 @@ export abstract class InteractionHandler {
                         pressure = touch.force;
                     }
                     if (!invalid) {
-                        const message = new TouchControlMessage(action, pointerId, position, pressure, buttons);
+                        const actionButton =
+                            action === MotionEvent.ACTION_DOWN ? MotionEvent.BUTTON_PRIMARY : 0;
+                        const message = new TouchControlMessage(
+                            action,
+                            pointerId,
+                            position,
+                            pressure,
+                            actionButton,
+                            buttons,
+                        );
                         messages.push(
                             ...InteractionHandler.validateMessage(e, message, storage, `${logPrefix}[validate]`),
                         );
@@ -526,7 +536,15 @@ export abstract class InteractionHandler {
                 if (action === MotionEvent.ACTION_UP) {
                     pressure = 0;
                 }
-                const message = new TouchControlMessage(action, pointerId, position, pressure, buttons);
+                const actionButton = action === MotionEvent.ACTION_DOWN ? MotionEvent.BUTTON_PRIMARY : 0;
+                const message = new TouchControlMessage(
+                    action,
+                    pointerId,
+                    position,
+                    pressure,
+                    actionButton,
+                    buttons,
+                );
                 messages.push(...InteractionHandler.validateMessage(e, message, storage, `${logPrefix}[validate]`));
                 points.push(touch.position.point);
             } else {
