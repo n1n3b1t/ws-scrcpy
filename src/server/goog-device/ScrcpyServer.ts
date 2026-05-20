@@ -2,15 +2,30 @@ import '../../../vendor/Genymobile/scrcpy/scrcpy-server.jar';
 import '../../../vendor/Genymobile/scrcpy/LICENSE';
 
 import { Device } from './Device';
-import { ARGS_STRING, SERVER_PACKAGE, SERVER_PROCESS_NAME, SERVER_VERSION } from '../../common/Constants';
+import {
+    LOG_LEVEL,
+    SCRCPY_LISTENS_ON_ALL_INTERFACES,
+    SERVER_PACKAGE,
+    SERVER_PORT,
+    SERVER_PROCESS_NAME,
+    SERVER_TYPE,
+    SERVER_VERSION,
+} from '../../common/Constants';
 import path from 'path';
 import PushTransfer from '@dead50f7/adbkit/lib/adb/sync/pushtransfer';
 import { ServerVersion } from './ServerVersion';
+import { buildLegacyArgs_v1_19_ws6 } from './ServerArgs';
 
 const TEMP_PATH = '/data/local/tmp/';
 const FILE_DIR = path.join(__dirname, 'vendor/Genymobile/scrcpy');
 const FILE_NAME = 'scrcpy-server.jar';
-const RUN_COMMAND = `CLASSPATH=${TEMP_PATH}${FILE_NAME} nohup app_process ${ARGS_STRING}`;
+const RUN_COMMAND = `CLASSPATH=${TEMP_PATH}${FILE_NAME} nohup app_process ${buildLegacyArgs_v1_19_ws6({
+    serverVersion: SERVER_VERSION,
+    serverType: SERVER_TYPE,
+    logLevel: LOG_LEVEL,
+    serverPort: SERVER_PORT,
+    listenOnAllInterfaces: SCRCPY_LISTENS_ON_ALL_INTERFACES,
+})}`;
 
 type WaitForPidParams = { tryCounter: number; processExited: boolean; lookPidFile: boolean };
 
