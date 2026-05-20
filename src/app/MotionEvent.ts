@@ -16,4 +16,16 @@ export default class MotionEvent {
      * Button constant: Tertiary button (middle mouse button).
      */
     public static BUTTON_TERTIARY: number = 1 << 2;
+
+    /**
+     * Button constant: Back button (additional side button on multi-button mice).
+     * scrcpy 4.0 addition.
+     */
+    public static BUTTON_BACK: number = 1 << 3; // 8
+
+    /**
+     * Button constant: Forward button (additional side button on multi-button mice).
+     * scrcpy 4.0 addition.
+     */
+    public static BUTTON_FORWARD: number = 1 << 4; // 16
 }
