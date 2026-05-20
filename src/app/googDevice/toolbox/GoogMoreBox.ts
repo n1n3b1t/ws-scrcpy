@@ -169,6 +169,10 @@ export class GoogMoreBox {
                         client.sendMessage(CommandControlMessage.createSetClipboardCommand(text));
                     }
                 };
+            } else if (action === CommandControlMessage.TYPE_GET_CLIPBOARD) {
+                btn.onclick = () => {
+                    client.sendMessage(CommandControlMessage.createGetClipboardCommand());
+                };
             } else {
                 btn.onclick = () => {
                     client.sendMessage(new CommandControlMessage(action));
